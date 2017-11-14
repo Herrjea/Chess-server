@@ -9,7 +9,7 @@ import java.net.Socket;
 // YodafyServidorIterativo
 // (CC) jjramos, 2012
 //
-public class YodafyServidorConcurrente {
+public class TCPServer {
 
 
 	public static void main( String[] args ) {
@@ -19,7 +19,7 @@ public class YodafyServidorConcurrente {
 		Socket socketServicio = null;
 
 		// Ejercicio 3
-		YodafyClienteTCP servicio = null;
+		Client servicio = null;
 		boolean salir = false;
 		boolean error = false;
 
@@ -54,7 +54,7 @@ public class YodafyServidorConcurrente {
 				// Creamos un objeto de la clase ProcesadorYodafy, pasándole como 
 				// argumento el nuevo socket, para que realice el procesamiento
 				// Este esquema permite que se puedan usar hebras más fácilmente.
-				ProcesadorYodafy procesador = new ProcesadorYodafy( socketServicio );
+				Processor procesador = new Processor( socketServicio );
 				procesador.procesa();
 				
 			} while ( ! salir );

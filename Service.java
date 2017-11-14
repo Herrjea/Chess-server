@@ -12,7 +12,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 
-public class YodafyServicio extends Thread {
+public class Service extends Thread {
 
 	// Socket para la conexión TCP
 	Socket socketServicio = null;
@@ -23,7 +23,7 @@ public class YodafyServicio extends Thread {
 
 
 	// Ejercicio 3
-	public YodafyServicio( Socket socket_datos ){
+	public Service( Socket socket_datos ){
 
 		socketServicio = socket_datos;
 
