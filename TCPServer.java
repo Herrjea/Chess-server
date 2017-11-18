@@ -18,7 +18,6 @@ public class TCPServer {
 		ServerSocket serverSocket = null;
 		Socket socketServicio = null;
 
-		// Ejercicio 3
 		Client servicio = null;
 		boolean salir = false;
 		boolean error = false;
@@ -39,7 +38,7 @@ public class TCPServer {
 			
 			// Mientras ... siempre!
 			do {
-				
+
 				// Aceptamos una nueva conexión con accept()
 				/////////////////////////////////////////////////
 				try {
@@ -55,7 +54,7 @@ public class TCPServer {
 				// argumento el nuevo socket, para que realice el procesamiento
 				// Este esquema permite que se puedan usar hebras más fácilmente.
 				Processor procesador = new Processor( socketServicio );
-				procesador.procesa();
+				procesador.start();
 				
 			} while ( ! salir );
 			
