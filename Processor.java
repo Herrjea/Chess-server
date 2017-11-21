@@ -62,7 +62,7 @@ public class Processor extends Thread {
 	// Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
 	public Processor( Socket socketServicio  ) {
 		this.socketServicio = socketServicio;
-		random = new Random();
+		random = new Random();  //Creo que esto ya no sirve
 
 		serverState = START;
 		users.put("A","A");
@@ -99,7 +99,7 @@ public class Processor extends Thread {
 				
 				// Creamos un String a partir de un array de bytes de tamaño "bytesRecibidos":
 				String peticion = new String( datosRecibidos, 0, bytesRecibidos );
-				peticion.toLowerCase();
+				peticion = peticion.toLowerCase();
 
 
 				switch ( serverState ){
@@ -195,47 +195,51 @@ public class Processor extends Thread {
 
 							if ( this.checkMove( peticion ) ){
                                                             
-                                serverState = BLACKS;
-                                answer = "Blacks move now.";
-                            }
-                            else answer = "That was an illegal movement!";
+                                                            serverState = BLACKS;
+                                                            answer = "Blacks move now.";
+                                                        }
+                                                        else answer = "That was an illegal movement!";
 						}
 
 						// Blacks don't move here!
 						else {
                                                     
-                            answer = "Not your turn yet.";
+                                                    answer = "Not your turn yet.";
 						}
 
 						// Print current board
-						System.out.println( games[gameCode].toString() );
+                                                //Esto da igual que lo imprimas lo ejecuta el servidor
+                                                //Cuando lo ejecute el cliente no lo ver�
+                                                //Cuando le encies el mensaje de no te toca o el moviento
+                                                //Tienes que enviarlo con el tablero
+						//System.out.println( games[gameCode].toString() );
 
 						break;
 
 					case BLACKS:
 
-						// Whites move
+						// Blacks move
 						if ( color == BLACK ){
 
 							if ( this.checkMove( peticion ) ){
                                                             
-                                serverState = WHITES;
-                                answer = "Whites move now.";
-                            }
-                            else answer = "That was an illegal movement!";
+                                                            serverState = WHITES;
+                                                            answer = "Whites move now.";
+                                                        }
+                                                        else answer = "That was an illegal movement!";
 						}
 
 						// Blacks don't move here!
 						else {
                                                     
-                            answer = "Not your turn yet.";
+                                                    answer = "Not your turn yet.";
 						}
 
 						// Print current board
-						System.out.println( games[gameCode].toString() );
+						//System.out.println( games[gameCode].toString() );
 
 						break;
-				}
+                                }
 
 
 
