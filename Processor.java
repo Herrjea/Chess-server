@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.*;
+import chess.*;
 
 
 //
@@ -33,6 +34,9 @@ public class Processor extends Thread {
 	static HashMap<String,String> users = new HashMap<String,String>();
 	static ArrayList<String> games = new ArrayList<String>();
 
+	// Board for the games initiated
+	// by this processor's clients
+	Board board = null;
 	
 	// Referencia a un socket para enviar/recibir las peticiones/answers
 	private Socket socketServicio;
@@ -157,20 +161,22 @@ public class Processor extends Thread {
 						// Whites move
 						if ( color == WHITE ){
 
-							if (this.checkMov(peticion)) {
+							if ( this.checkMov( peticion ) ){
                                                             
-                                                            serverState = BLACKS;
-                                                            answer = "Turno de negras";
-                                                        }
-                                                        else answer = "Movimiento no válido";
+                                serverState = BLACKS;
+                                answer = "Blacks move now.";
+                            }
+                            else answer = "That was an illegal movement!";
 						}
 
 						// Blacks don't move here!
 						else {
                                                     
-                                                    answer = "No es tu turno";
-
+                            answer = "Not your turn yet.";
 						}
+
+						// Print current board
+						System.out.println( board.toString() );
 
 						break;
 				}
@@ -213,12 +219,12 @@ public class Processor extends Thread {
         
         public boolean checkMov (String query) {
             
-            if ( "MOV".equals(query.split( " " )[0]) && "TO".equals(query.split( " " )[2])) {
+            if ( "MOV".equals( query.split( " " )[0] ) && "TO".equals( query.split( " " )[2] ) ){
                 
                 String initPos = query.split( " " )[1];
-                String destinyPos = query.split( " " )[3];
+                String goalPos = query.split( " " )[3];
                 
-                return mov(initPos, destinyPos);
+                return board.move( initPos + " " + goalPos );
             }
             
             return false;

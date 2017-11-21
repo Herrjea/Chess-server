@@ -1,8 +1,9 @@
 all:
+	javac chess/*.java
 	javac *.java
 
 clean:
-	rm *.class
+	find . -name '*.class' -exec rm {} \;
 
 redo:
 	touch *.java
