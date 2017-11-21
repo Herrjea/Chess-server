@@ -179,6 +179,30 @@ public class Processor extends Thread {
 						System.out.println( board.toString() );
 
 						break;
+
+					case BLACKS:
+
+						// Whites move
+						if ( color == BLACK ){
+
+							if ( this.checkMov( peticion ) ){
+                                                            
+                                serverState = WHITES;
+                                answer = "Whites move now.";
+                            }
+                            else answer = "That was an illegal movement!";
+						}
+
+						// Blacks don't move here!
+						else {
+                                                    
+                            answer = "Not your turn yet.";
+						}
+
+						// Print current board
+						System.out.println( board.toString() );
+
+						break;
 				}
 
 
