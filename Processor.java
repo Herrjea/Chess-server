@@ -32,11 +32,15 @@ import chess.*;
 public class Processor extends Thread {
 
 	static HashMap<String,String> users = new HashMap<String,String>();
-	static ArrayList<String> games = new ArrayList<String>();
+	static ArrayList<Integer> gameCodes = new ArrayList<Integer>();
 
-	// Board for the games initiated
-	// by this processor's clients
-	Board board = null;
+	// Boards for all of the games initiated by the clients
+	// that a currently being played
+	static int initialCapacity;
+	static Board [] games = null;
+
+	// Board code to access existing games
+	int gameCode;
 	
 	// Referencia a un socket para enviar/recibir las peticiones/answers
 	private Socket socketServicio;
@@ -62,6 +66,9 @@ public class Processor extends Thread {
 
 		serverState = START;
 		users.put("A","A");
+
+		initialCapacity = 10;
+		games = new Board[ initialCapacity ];
 	}
 	
 	
@@ -127,30 +134,55 @@ public class Processor extends Thread {
 
 					case AUTHENTICATED:
 
-						String code = peticion.split( " " )[1];
+						int code = -1;
+						boolean failedParse = false;
 
-						if ( peticion.split( " " )[0].equals( "JOIN" ) ){
-
-							if ( games.contains( code ) ){
-								answer = "Joining the game.";
-								games.remove( code );
-								serverState = WHITES;
-								color = BLACK;
-							}
-							else {
-								answer = "Error 404: game not found. Type in another game code.";
-							}
+						// Get number typed by player
+						try {
+							code = Integer.parseInt( peticion.split( " " )[1] );
+						} catch ( NumberFormatException nfe ){
+							failedParse = true;
 						}
 
-						else if ( peticion.split( " " )[0].equals( "CREATE" ) ){
+						// Check for valid code
+						if ( failedParse || code < 0 || code > games.length ){
 
-							if ( ! games.contains( code ) ){
-								answer = "Game created. Waiting for your opponent.";
-								serverState = WHITES;
-								color = WHITE;
+							System.out.println(
+								peticion.split( " " )[1] + " is not a valid code. Type in a number between 0 and " + games.length +
+								" with the following syntax: \n\t(JOIN/CREATE) <code>" );
+						}
+
+						else {
+
+							// Process request for joining an existing game
+							if ( peticion.split( " " )[0].equals( "JOIN" ) ){
+
+								if ( gameCodes.contains( code ) ){
+									answer = "Joining the game.";
+									// Remove it from games waiting for an adversary
+									// so that no third party can come into the game
+									gameCodes.remove( code );
+									serverState = WHITES;
+									color = BLACK;
+								}
+								else {
+									answer = "Error 404: game not found. Type in another game code.";
+								}
 							}
-							else {
-								answer = "Error 405: game found. Enter a non-existing game code.";
+
+							// Process request for starting a game
+							else if ( peticion.split( " " )[0].equals( "CREATE" ) ){
+
+								if ( ! gameCodes.contains( code ) ){
+									answer = "Game created. Waiting for your opponent.";
+									gameCodes.add( code );
+									games[code] = new Board();
+									serverState = WHITES;
+									color = WHITE;
+								}
+								else {
+									answer = "Error 405: game found. Enter a non-existing game code.";
+								}
 							}
 						}
 
@@ -161,7 +193,7 @@ public class Processor extends Thread {
 						// Whites move
 						if ( color == WHITE ){
 
-							if ( this.checkMov( peticion ) ){
+							if ( this.checkMove( peticion ) ){
                                                             
                                 serverState = BLACKS;
                                 answer = "Blacks move now.";
@@ -176,7 +208,7 @@ public class Processor extends Thread {
 						}
 
 						// Print current board
-						System.out.println( board.toString() );
+						System.out.println( games[gameCode].toString() );
 
 						break;
 
@@ -185,7 +217,7 @@ public class Processor extends Thread {
 						// Whites move
 						if ( color == BLACK ){
 
-							if ( this.checkMov( peticion ) ){
+							if ( this.checkMove( peticion ) ){
                                                             
                                 serverState = WHITES;
                                 answer = "Whites move now.";
@@ -200,7 +232,7 @@ public class Processor extends Thread {
 						}
 
 						// Print current board
-						System.out.println( board.toString() );
+						System.out.println( games[gameCode].toString() );
 
 						break;
 				}
@@ -228,10 +260,10 @@ public class Processor extends Thread {
 
 		if ( query.contains( "LOGIN" ) && query.contains( "PASSWD" ) ){
 
-			// Buscar al usuario
+			// Find user
 			userLogin = query.split( " " )[1];
 			if ( users.containsKey( userLogin ) ){
-			// Buscar la contraseña
+				// Find password
 				String password = query.split( " " )[3];
 				if ( users.get( userLogin ).equals( password ) )
 					return true;
@@ -241,14 +273,14 @@ public class Processor extends Thread {
 		return false;
 	}
         
-        public boolean checkMov (String query) {
+        public boolean checkMove( String query ){
             
             if ( "MOV".equals( query.split( " " )[0] ) && "TO".equals( query.split( " " )[2] ) ){
                 
                 String initPos = query.split( " " )[1];
                 String goalPos = query.split( " " )[3];
                 
-                return board.move( initPos + " " + goalPos );
+                return games[gameCode].move( initPos + " " + goalPos );
             }
             
             return false;

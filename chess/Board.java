@@ -10,6 +10,11 @@ public class Board{
 	private int turn;
 	private boolean[] check = new boolean[2];
 
+	public Board(){
+
+		this( 8, 8 );
+	}
+
 	public Board( int x, int y ){
 
 		width = x;
