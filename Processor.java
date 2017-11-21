@@ -196,15 +196,15 @@ public class Processor extends Thread {
 							if ( this.checkMove( peticion ) ){
                                                             
                                                             serverState = BLACKS;
-                                                            answer = "Blacks move now.";
+                                                            answer = games[gameCode].toString();
                                                         }
-                                                        else answer = "That was an illegal movement!";
+                                                        else answer = games[gameCode].toString() + "That was an illegal movement!";
 						}
 
 						// Blacks don't move here!
 						else {
                                                     
-                                                    answer = "Not your turn yet.";
+                                                    answer = games[gameCode].toString() + "Not your turn yet.";
 						}
 
 						// Print current board
@@ -224,19 +224,16 @@ public class Processor extends Thread {
 							if ( this.checkMove( peticion ) ){
                                                             
                                                             serverState = WHITES;
-                                                            answer = "Whites move now.";
+                                                            answer = games[gameCode].toString();
                                                         }
-                                                        else answer = "That was an illegal movement!";
+                                                        else answer = games[gameCode].toString() + "That was an illegal movement!";
 						}
 
 						// Blacks don't move here!
 						else {
                                                     
-                                                    answer = "Not your turn yet.";
+                                                    answer = games[gameCode].toString() + "Not your turn yet.";
 						}
-
-						// Print current board
-						//System.out.println( games[gameCode].toString() );
 
 						break;
                                 }
