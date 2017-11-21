@@ -62,6 +62,7 @@ public class Processor extends Thread {
 	
 	
 	// Aquí es donde se realiza el procesamiento realmente:
+        @Override
 	public void run(){
 		
 		// Como máximo leeremos un bloque de 1024 bytes. Esto se puede modificar.
@@ -156,11 +157,18 @@ public class Processor extends Thread {
 						// Whites move
 						if ( color == WHITE ){
 
-							
+							if (this.checkMov(peticion)) {
+                                                            
+                                                            serverState = BLACKS;
+                                                            answer = "Turno de negras";
+                                                        }
+                                                        else answer = "Movimiento no v�lido";
 						}
 
 						// Blacks don't move here!
 						else {
+                                                    
+                                                    answer = "No es tu turno";
 
 						}
 
@@ -185,30 +193,7 @@ public class Processor extends Thread {
 		}
 
 	}
-
-	// Yoda interpreta una frase y la devuelve en su "dialecto":
-	private String yodaDo( String peticion ) {
-		// Desordenamos las palabras:
-		String[] s = peticion.split( " " );
-		String resultado = "";
-		
-		for ( int i = 0; i < s.length; i++ ){
-			int j = random.nextInt( s.length );
-			int k = random.nextInt( s.length );
-			String tmp = s[j];
-			
-			s[j] = s[k];
-			s[k] = tmp;
-		}
-		
-		resultado = s[0];
-		for ( int i = 1; i < s.length; i++ ){
-		  resultado += " " + s[i];
-		}
-		
-		return resultado /* Ejercicio 2 */ + "\n";
-	}
-
+        
 	public boolean checkUser( String query ){
 
 		if ( query.contains( "LOGIN" ) && query.contains( "PASSWD" ) ){
@@ -225,4 +210,17 @@ public class Processor extends Thread {
 
 		return false;
 	}
+        
+        public boolean checkMov (String query) {
+            
+            if ( "MOV".equals(query.split( " " )[0]) && "TO".equals(query.split( " " )[2])) {
+                
+                String initPos = query.split( " " )[1];
+                String destinyPos = query.split( " " )[3];
+                
+                return mov(initPos, destinyPos);
+            }
+            
+            return false;
+        }
 }
