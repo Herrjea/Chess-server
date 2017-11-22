@@ -59,7 +59,7 @@ public class Processor extends Thread {
 
 	final int 
 		START = 0, UNAUTHENTICATED = 1, AUTHENTICATED = 2,
-		WHITES = 8, BLACKS = 9, LOGOUT = 15,
+		WHITES = 3, BLACKS = 4, LOGOUT = 5,
 		WHITE = 0, BLACK = 1;
 	
 	// Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
@@ -103,11 +103,19 @@ public class Processor extends Thread {
 				peticion = peticion.toUpperCase();
 
 
+				// Check if user is leaving
+				if ( peticion.contains( "EXIT" ) ){
+
+					answer = "Leaving now. =(";
+					serverState = LOGOUT;
+				}
+
+
 				switch ( serverState ){
 
 					case START:
 
-						if ( peticion.contains( "conexion") ){
+						if ( peticion.contains( "CONNECT") ){
 
 							answer = "Greetings, my fearless chess player. You may now introduce yourslef.";
 
