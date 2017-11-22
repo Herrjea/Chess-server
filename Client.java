@@ -16,52 +16,40 @@ public class Client {
 
 	public static void main( String[] args ) {
 		
-		byte [] bufferEnvio;
-		byte [] bufferRecepcion = new byte[256];
-		int bytesLeidos = 0;
+		String buferEnvio;
+		String buferRecepcion;
+
 		Scanner in = new Scanner( System.in );
-		
-		// Nombre del host donde se ejecuta el servidor:
+
 		String host = "localhost";
-		// Puerto en el que espera el servidor:
 		int port = 8989;
-		
-		// Socket para la conexión TCP
 		Socket socketServicio = null;
 		
+		buferEnvio = "";
+		buferRecepcion = "";
+
 		try {
-			// Creamos un socket que se conecte a "host" y "port":
-			socketServicio = new Socket( host, port );		
-			
-			InputStream inputStream = socketServicio.getInputStream();
-			OutputStream outputStream = socketServicio.getOutputStream();
+			socketServicio = new Socket( host, port );
 
-			PrintWriter outPrinter = new PrintWriter( socketServicio.getOutputStream(), true );
-			BufferedReader inReader = new BufferedReader( new InputStreamReader( socketServicio.getInputStream() ) );
+			BufferedReader inReader = new BufferedReader(new InputStreamReader(socketServicio.getInputStream()));
+			PrintWriter outPrinter = new PrintWriter(socketServicio.getOutputStream(), true);
 			
+			while (buferEnvio.toUpperCase() != "EXIT") {
 
-			// Si queremos enviar una cadena de caracteres por un OutputStream, hay que pasarla primero
-			// a un array de bytes:
-			System.out.print( "> " );
-			bufferEnvio = in.nextLine().getBytes();
-			
-			// Enviamos el array por el outputStream;
-			outputStream.write( bufferEnvio, 0, bufferEnvio.length );
+				System.out.print( "> " );
+				buferEnvio = in.nextLine() + "\n";
 
-			outputStream.flush();
-System.out.println( "aaa" );
+				outPrinter.print(buferEnvio);
+				outPrinter.flush();
 
-			// Leer la respuesta del servidor
-			String respuesta = inReader.readLine();
-System.out.println( "bbb" );
-			System.out.println( respuesta );
+				// Leer la respuesta del servidor
+				buferRecepcion = inReader.readLine();
+				System.out.println( buferRecepcion );
+			}
+
+			//socketServicio.close();
 			
-			
-			// Una vez terminado el servicio, cerramos el socket (automáticamente se cierran
-			// el inpuStream  y el outputStream)
-			socketServicio.close();
-			
-System.out.println( "ccc" );
+//System.out.println( "ccc" );
 			// Excepciones:
 		} catch ( UnknownHostException e ) {
 			System.err.println( "Error: Nombre de host no encontrado." );

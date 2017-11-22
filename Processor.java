@@ -12,23 +12,16 @@ Falta:
 
 */
 
-
-
-
-
-
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
 import chess.*;
 
-
-//
-// Nota: si esta clase extendiera la clase Thread, y el procesamiento lo hiciera el método "run()",
-// ¡Podríamos realizar un procesado concurrente! 
-//
 public class Processor extends Thread {
 
 	static HashMap<String,String> users = new HashMap<String,String>();
@@ -42,17 +35,14 @@ public class Processor extends Thread {
 	// Board code to access existing games
 	int gameCode;
 	
-	// Referencia a un socket para enviar/recibir las peticiones/answers
-	private Socket socketServicio;
-	// stream de lectura (por aquí se recibe lo que envía el cliente)
-	private InputStream inputStream;
-	// stream de escritura (por aquí se envía los datos al cliente)
-	private OutputStream outputStream;
-	
-	// Para que la answer sea siempre diferente, usamos un generador de números aleatorios.
-	private Random random;
 
-	int serverState/*State.START*/;
+	private Socket socketServicio;
+
+	private BufferedReader inReader;
+
+	private PrintWriter outPrinter;
+
+	int serverState;
 	int color;
 
 	String userLogin = "";
@@ -62,10 +52,9 @@ public class Processor extends Thread {
 		WHITES = 3, BLACKS = 4, LOGOUT = 5,
 		WHITE = 0, BLACK = 1;
 	
-	// Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
+	// Constructor
 	public Processor( Socket socketServicio  ) {
 		this.socketServicio = socketServicio;
-		random = new Random();  //Creo que esto ya no sirve
 
 		serverState = START;
 		users.put("A","A");
@@ -74,57 +63,45 @@ public class Processor extends Thread {
 		games = new Board[ initialCapacity ];
 	}
 	
-	
-	// Aquí es donde se realiza el procesamiento realmente:
         @Override
 	public void run(){
 		
-		// Como máximo leeremos un bloque de 1024 bytes. Esto se puede modificar.
-		byte [] datosRecibidos = new byte[1024];
-		int bytesRecibidos = 0;
-		
-		// Array de bytes para enviar la answer. Podemos reservar memoria cuando vayamos a enviarka:
-		byte [] datosEnviar;
+		String datosRecibidos;
+		String answer;
+		String peticion;
 
-		String answer = "";
-		
-		while ( serverState != LOGOUT/*State.LOGOUT*/ ){
+		datosRecibidos = "";
+		answer = "";
+		peticion = "";
 
-
-System.out.println( "Estado: " + serverState );
-
-			try {
-				// Get IO flux
-				inputStream = socketServicio.getInputStream();
-				outputStream = socketServicio.getOutputStream();
+		try {
+			// Get IO flux
+			inReader = new BufferedReader(new InputStreamReader(socketServicio.getInputStream()));
+			outPrinter = new PrintWriter(socketServicio.getOutputStream(), true);
 				
+			while (serverState != LOGOUT) {
+			
 				// Read client's request
-				bytesRecibidos = inputStream.read( datosRecibidos );
-				
-				// Create string from bytes received
-				String peticion = new String( datosRecibidos, 0, bytesRecibidos );
-				peticion = peticion.toUpperCase();
-
+				datosRecibidos = inReader.readLine();
+				peticion = datosRecibidos.toUpperCase();
 
 				// Check if user is leaving
 				if ( peticion.contains( "EXIT" ) ){
-
-					answer = "Leaving now. =(";
+					answer = "Leaving now. =(\n";
 					serverState = LOGOUT;
 				}
 
+				System.out.println( "Thread id " + Thread.currentThread().getId() + " at server state: " + serverState);
 
 				switch ( serverState ){
 
 					case START:
 
-						//if ( peticion.contains( "CONNECT") ){
-
-							answer = "Greetings, my fearless chess player. You may now introduce yourslef.";
-
+						if ( peticion.contains( "CONNECT") ){
+							answer = "Greetings, my fearless chess player. You may now introduce yourslef.\n";
 							serverState = 1;
-						//}
-
+						}
+						else answer = "Writte \'connect\' to connect\n";
 						break;
 
 					case UNAUTHENTICATED:
@@ -132,16 +109,10 @@ System.out.println( "Estado: " + serverState );
 						boolean authenticated = checkUser( peticion );
 
 						if ( authenticated ){
-
-							answer = "=) Hello, " + userLogin + "! Do yo want to join or to create a game?";
-
+							answer = "=) Hello, " + userLogin + "! Do yo want to join or to create a game?\n";
 							serverState = AUTHENTICATED;
 						}
-						else {
-
-							answer = "Error 0000001. Wrong username or password.";
-						}
-
+						else answer = "Error 0000001. Wrong username or password.\n";
 						break;
 
 					case AUTHENTICATED:
@@ -154,15 +125,11 @@ System.out.println( "Estado: " + serverState );
 							code = Integer.parseInt( peticion.split( " " )[1] );
 						} catch ( NumberFormatException nfe ){
 							failedParse = true;
-						}
+						}	//NO SE QUE HACE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 						// Check for valid code
-						if ( failedParse || code < 0 || code > games.length ){
-
-							System.out.println(
-								peticion.split( " " )[1] + " is not a valid code. Type in a number between 0 and " + games.length +
-								" with the following syntax: \n\t(JOIN/CREATE) <code>" );
-						}
+						if ( failedParse || code < 0 || code > games.length )
+							System.out.println( peticion.split( " " )[1] + " is not a valid code. Type in a number between 0 and " + games.length + " with the following syntax: \n\t(JOIN/CREATE) <code>\n" );
 
 						else {
 
@@ -170,34 +137,29 @@ System.out.println( "Estado: " + serverState );
 							if ( peticion.split( " " )[0].equals( "JOIN" ) ){
 
 								if ( gameCodes.contains( code ) ){
-									answer = "Joining the game.";
+									answer = "Joining the game.\n";
 									// Remove it from games waiting for an adversary
 									// so that no third party can come into the game
 									gameCodes.remove( code );
 									serverState = WHITES;
 									color = BLACK;
 								}
-								else {
-									answer = "Error 404: game not found. Type in another game code.";
-								}
+								else answer = "Error 404: game not found. Type in another game code.\n";
 							}
 
 							// Process request for starting a game
 							else if ( peticion.split( " " )[0].equals( "CREATE" ) ){
 
 								if ( ! gameCodes.contains( code ) ){
-									answer = "Game created. Waiting for your opponent.";
+									answer = "Game created. Waiting for your opponent.\n";
 									gameCodes.add( code );
 									games[code] = new Board();
 									serverState = WHITES;
 									color = WHITE;
 								}
-								else {
-									answer = "Error 405: game found. Enter a non-existing game code.";
-								}
+								else answer = "Error 405: game found. Enter a non-existing game code.\n";
 							}
 						}
-
 						break;
 
 					case WHITES:
@@ -207,25 +169,20 @@ System.out.println( "Estado: " + serverState );
 
 							if ( this.checkMove( peticion ) ){
                                                          
-                                if ( games[gameCode].getCheck( WHITE ) ){
-                                	answer = games[gameCode].toString() + "\nWhites win the game!";
-                                	serverState = AUTHENTICATED;
-                                }
-                                else {
-	                                serverState = BLACKS;
-	                                answer = games[gameCode].toString() + "\nBlacks move now.";
-	                            }
-                            }
-                            else
-                            	answer = games[gameCode].toString() + "\nThat was an illegal movement!\nPlease specify a movement with the following syntax: MOV <source> TO <destination>.";
+                               					if ( games[gameCode].getCheck( WHITE ) ){
+                                					answer = games[gameCode].toString() + "\nWhites win the game!\n";
+                                					serverState = AUTHENTICATED;
+                                				}
+                                				else {
+	                                				serverState = BLACKS;
+	                                				answer = games[gameCode].toString() + "\nBlacks move now.\n";
+	                            				}
+                            				}
+                            				else answer = games[gameCode].toString() + "\nThat was an illegal movement!\nPlease specify a movement with the following syntax: MOV <source> TO <destination>.\n";
 						}
 
 						// Blacks don't move here!
-						else {
-                                                    
-                            answer = games[gameCode].toString() + "\nNot your turn yet.";
-						}
-
+						else answer = games[gameCode].toString() + "\nNot your turn yet.\n";
 						break;
 
 					case BLACKS:
@@ -235,48 +192,35 @@ System.out.println( "Estado: " + serverState );
 
 							if ( this.checkMove( peticion ) ){
                                                             
-                                if ( games[gameCode].getCheck( BLACK ) ){
-                                	answer = games[gameCode].toString() + "\nBlacks win the game!";
-                                	serverState = AUTHENTICATED;
-                                }
-                                else {
-                                	serverState = WHITES;
-                                	answer = games[gameCode].toString() + "\nWhites move now.";
-                                }
-                            }
-                            else answer = games[gameCode].toString() + "\nThat was an illegal movement!";
+                                				if ( games[gameCode].getCheck( BLACK ) ){
+                                					answer = games[gameCode].toString() + "\nBlacks win the game!";
+                                					serverState = AUTHENTICATED;
+                                				}
+                                				else {
+                                					serverState = WHITES;
+                                					answer = games[gameCode].toString() + "\nWhites move now.";
+                                				}
+                            				}
+                            				else answer = games[gameCode].toString() + "\nThat was an illegal movement!";
 						}
 
 						// Whites don't move here!
-						else {
-                                                    
-                            answer = games[gameCode].toString() + "\nNot your turn yet.";
-						}
-
+						else answer = games[gameCode].toString() + "\nNot your turn yet.";
 						break;
 
 					default:
 
 						System.out.println( "You've done something wrong, this message should never appear. Muahaha." );
-				}
+						break;
+				}//End of switch
 
-
-
-				// Turn message into byte array
-				datosEnviar = answer.getBytes();
-				
 				// Send to client
-				outputStream.write( datosEnviar, 0, datosEnviar.length );
-				outputStream.flush();
-				System.out.println( "Datos enviados desde Processor" );
+				if (answer != "\n") outPrinter.println(answer);
+			}//End of while
 				
-				
-			} catch ( IOException e ) {
-
-				System.err.println( "Error al obtener los flujos de entrada/salida." );
-			}
+		} catch ( IOException e ) {
+			System.err.println( "Error al obtener los flujos de entrada/salida." );
 		}
-
 	}
         
 

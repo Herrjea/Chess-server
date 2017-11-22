@@ -39,14 +39,11 @@ public class TCPServer {
 
 				// Aceptamos una nueva conexión con accept()
 				try {
-					System.out.println( "a" );
 					socketServicio = serverSocket.accept();
 				} catch ( IOException e ){
 					System.out.println( "Error: no se pudo aceptar la conexión solicitada." );
 					error = true;
 				}
-					System.out.println( "b" );
-			
 				
 				// Creamos un objeto de la clase ProcesadorYodafy, pasándole como 
 				// argumento el nuevo socket, para que realice el procesamiento
