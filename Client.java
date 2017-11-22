@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 public class Client {
 
@@ -18,6 +19,7 @@ public class Client {
 		byte [] bufferEnvio;
 		byte [] bufferRecepcion = new byte[256];
 		int bytesLeidos = 0;
+		Scanner in = new Scanner( System.in );
 		
 		// Nombre del host donde se ejecuta el servidor:
 		String host = "localhost";
@@ -40,7 +42,8 @@ public class Client {
 
 			// Si queremos enviar una cadena de caracteres por un OutputStream, hay que pasarla primero
 			// a un array de bytes:
-			bufferEnvio = "Al monte del volcán debes ir sin demora".getBytes();
+			System.out.print( "> " );
+			bufferEnvio = in.nextLine().getBytes();
 			
 			// Enviamos el array por el outputStream;
 			outputStream.write( bufferEnvio, 0, bufferEnvio.length );
