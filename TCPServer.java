@@ -32,22 +32,20 @@ public class TCPServer {
 		
 		try {
 			// Abrimos el socket en modo pasivo, escuchando el en puerto indicado por "port"
-			//////////////////////////////////////////////////
 			serverSocket = new ServerSocket( port );
-			//////////////////////////////////////////////////
 			
 			// Mientras ... siempre!
 			do {
 
 				// Aceptamos una nueva conexión con accept()
-				/////////////////////////////////////////////////
 				try {
+					System.out.println( "a" );
 					socketServicio = serverSocket.accept();
 				} catch ( IOException e ){
 					System.out.println( "Error: no se pudo aceptar la conexión solicitada." );
 					error = true;
 				}
-				//////////////////////////////////////////////////
+					System.out.println( "b" );
 			
 				
 				// Creamos un objeto de la clase ProcesadorYodafy, pasándole como 

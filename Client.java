@@ -29,15 +29,11 @@ public class Client {
 		
 		try {
 			// Creamos un socket que se conecte a "host" y "port":
-			//////////////////////////////////////////////////////
-			socketServicio = new Socket( host, port );
-			//////////////////////////////////////////////////////			
+			socketServicio = new Socket( host, port );		
 			
 			InputStream inputStream = socketServicio.getInputStream();
 			OutputStream outputStream = socketServicio.getOutputStream();
 
-
-			/// Ejercicio 2
 			PrintWriter outPrinter = new PrintWriter( socketServicio.getOutputStream(), true );
 			BufferedReader inReader = new BufferedReader( new InputStreamReader( socketServicio.getInputStream() ) );
 			
@@ -47,30 +43,22 @@ public class Client {
 			bufferEnvio = "Al monte del volcán debes ir sin demora".getBytes();
 			
 			// Enviamos el array por el outputStream;
-			//////////////////////////////////////////////////////
 			outputStream.write( bufferEnvio, 0, bufferEnvio.length );
-			//////////////////////////////////////////////////////
-			
-			// Aunque le indiquemos a TCP que queremos enviar varios arrays de bytes, sólo
-			// los enviará efectivamente cuando considere que tiene suficientes datos que enviar...
-			// Podemos usar "flush()" para obligar a TCP a que no espere para hacer el envío:
-			//////////////////////////////////////////////////////
+
 			outputStream.flush();
-			//////////////////////////////////////////////////////
+System.out.println( "aaa" );
 
-
-			// Ejercicio 2
 			// Leer la respuesta del servidor
 			String respuesta = inReader.readLine();
+System.out.println( "bbb" );
 			System.out.println( respuesta );
 			
 			
 			// Una vez terminado el servicio, cerramos el socket (automáticamente se cierran
 			// el inpuStream  y el outputStream)
-			//////////////////////////////////////////////////////
 			socketServicio.close();
-			//////////////////////////////////////////////////////
 			
+System.out.println( "ccc" );
 			// Excepciones:
 		} catch ( UnknownHostException e ) {
 			System.err.println( "Error: Nombre de host no encontrado." );

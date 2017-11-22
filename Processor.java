@@ -90,6 +90,9 @@ public class Processor extends Thread {
 		
 		while ( serverState != LOGOUT/*State.LOGOUT*/ ){
 
+
+System.out.println( "Estado: " + serverState );
+
 			try {
 				// Get IO flux
 				inputStream = socketServicio.getInputStream();
@@ -115,12 +118,12 @@ public class Processor extends Thread {
 
 					case START:
 
-						if ( peticion.contains( "CONNECT") ){
+						//if ( peticion.contains( "CONNECT") ){
 
 							answer = "Greetings, my fearless chess player. You may now introduce yourslef.";
 
 							serverState = 1;
-						}
+						//}
 
 						break;
 
@@ -264,6 +267,8 @@ public class Processor extends Thread {
 				
 				// Send to client
 				outputStream.write( datosEnviar, 0, datosEnviar.length );
+				outputStream.flush();
+				System.out.println( "Datos enviados desde Processor" );
 				
 				
 			} catch ( IOException e ) {
