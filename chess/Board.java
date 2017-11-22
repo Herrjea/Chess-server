@@ -7,7 +7,7 @@ public class Board{
 	private Piece[][] board;
 	private int width;
 	private int height;
-	private int turn;
+	private int turn;	// 0 for whites, 1 for blacks. Pretty messy
 	private boolean[] check = new boolean[2];
 
 	public Board(){
@@ -67,6 +67,7 @@ public class Board{
 
 	public boolean getCheck( int side ){
 
+		if ( side > 1 ) System.out.println( "Side = " + side + ". Qué te ocurre en la cabesa, muyayo." );
 		return check[side];
 	}
 

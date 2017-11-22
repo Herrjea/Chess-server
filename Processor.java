@@ -57,7 +57,10 @@ public class Processor extends Thread {
 
 	String userLogin = "";
 
-	final int START = 0, UNAUTHENTICATED = 1, AUTHENTICATED = 2, WHITES = 8, BLACKS = 9, LOGOUT = 15, WHITE = 20, BLACK = 21;
+	final int 
+		START = 0, UNAUTHENTICATED = 1, AUTHENTICATED = 2,
+		WHITES = 8, BLACKS = 9, LOGOUT = 15,
+		WHITE = 0, BLACK = 1;
 	
 	// Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
 	public Processor( Socket socketServicio  ) {
@@ -88,18 +91,16 @@ public class Processor extends Thread {
 		while ( serverState != LOGOUT/*State.LOGOUT*/ ){
 
 			try {
-				// Obtiene los flujos de escritura/lectura
+				// Get IO flux
 				inputStream = socketServicio.getInputStream();
 				outputStream = socketServicio.getOutputStream();
 				
-				// Lee la petición del cliente
-				////////////////////////////////////////////////////////
+				// Read client's request
 				bytesRecibidos = inputStream.read( datosRecibidos );
-				////////////////////////////////////////////////////////
 				
-				// Creamos un String a partir de un array de bytes de tamaño "bytesRecibidos":
+				// Create string from bytes received
 				String peticion = new String( datosRecibidos, 0, bytesRecibidos );
-				peticion = peticion.toLowerCase();
+				peticion = peticion.toUpperCase();
 
 
 				switch ( serverState ){
@@ -194,25 +195,25 @@ public class Processor extends Thread {
 						if ( color == WHITE ){
 
 							if ( this.checkMove( peticion ) ){
-                                                            
-                                                            serverState = BLACKS;
-                                                            answer = games[gameCode].toString();
-                                                        }
-                                                        else answer = games[gameCode].toString() + "That was an illegal movement!";
+                                                         
+                                if ( games[gameCode].getCheck( WHITE ) ){
+                                	answer = games[gameCode].toString() + "\nWhites win the game!";
+                                	serverState = AUTHENTICATED;
+                                }
+                                else {
+	                                serverState = BLACKS;
+	                                answer = games[gameCode].toString() + "\nBlacks move now.";
+	                            }
+                            }
+                            else
+                            	answer = games[gameCode].toString() + "\nThat was an illegal movement!\nPlease specify a movement with the following syntax: MOV <source> TO <destination>.";
 						}
 
 						// Blacks don't move here!
 						else {
                                                     
-                                                    answer = games[gameCode].toString() + "Not your turn yet.";
+                            answer = games[gameCode].toString() + "\nNot your turn yet.";
 						}
-
-						// Print current board
-                                                //Esto da igual que lo imprimas lo ejecuta el servidor
-                                                //Cuando lo ejecute el cliente no lo ver�
-                                                //Cuando le encies el mensaje de no te toca o el moviento
-                                                //Tienes que enviarlo con el tablero
-						//System.out.println( games[gameCode].toString() );
 
 						break;
 
@@ -223,49 +224,63 @@ public class Processor extends Thread {
 
 							if ( this.checkMove( peticion ) ){
                                                             
-                                                            serverState = WHITES;
-                                                            answer = games[gameCode].toString();
-                                                        }
-                                                        else answer = games[gameCode].toString() + "That was an illegal movement!";
+                                if ( games[gameCode].getCheck( BLACK ) ){
+                                	answer = games[gameCode].toString() + "\nBlacks win the game!";
+                                	serverState = AUTHENTICATED;
+                                }
+                                else {
+                                	serverState = WHITES;
+                                	answer = games[gameCode].toString() + "\nWhites move now.";
+                                }
+                            }
+                            else answer = games[gameCode].toString() + "\nThat was an illegal movement!";
 						}
 
-						// Blacks don't move here!
+						// Whites don't move here!
 						else {
                                                     
-                                                    answer = games[gameCode].toString() + "Not your turn yet.";
+                            answer = games[gameCode].toString() + "\nNot your turn yet.";
 						}
 
 						break;
-                                }
+
+					default:
+
+						System.out.println( "You've done something wrong, this message should never appear. Muahaha." );
+				}
 
 
 
-				// Convertimos el String de answer en una array de bytes:
+				// Turn message into byte array
 				datosEnviar = answer.getBytes();
 				
-				// Enviamos la traducción de Yoda:
-				////////////////////////////////////////////////////////
+				// Send to client
 				outputStream.write( datosEnviar, 0, datosEnviar.length );
-				////////////////////////////////////////////////////////
-				
 				
 				
 			} catch ( IOException e ) {
-				System.err.println( "Error al obtener los flujso de entrada/salida." );
+
+				System.err.println( "Error al obtener los flujos de entrada/salida." );
 			}
 		}
 
 	}
         
+
 	public boolean checkUser( String query ){
+
 
 		if ( query.contains( "LOGIN" ) && query.contains( "PASSWD" ) ){
 
 			// Find user
 			userLogin = query.split( " " )[1];
+
 			if ( users.containsKey( userLogin ) ){
+
 				// Find password
+
 				String password = query.split( " " )[3];
+
 				if ( users.get( userLogin ).equals( password ) )
 					return true;
 			}
@@ -274,8 +289,10 @@ public class Processor extends Thread {
 		return false;
 	}
         
+
         public boolean checkMove( String query ){
             
+
             if ( "MOV".equals( query.split( " " )[0] ) && "TO".equals( query.split( " " )[2] ) ){
                 
                 String initPos = query.split( " " )[1];
