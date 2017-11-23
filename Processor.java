@@ -71,7 +71,7 @@ public class Processor extends Thread {
         @Override
 	public void run(){
 		
-		byte [] datosRecibidos = new byte[1024];
+		byte [] datosRecibidos = new byte[20000];
 		byte [] datosEnviar;
 		int bytesRecibidos = 0;
 		String answer;
@@ -91,11 +91,10 @@ public class Processor extends Thread {
 				bytesRecibidos = inputStream.read( datosRecibidos );
 				peticion = new String( datosRecibidos, 0, bytesRecibidos ).toUpperCase();
 
-				peticion += " . . . . . . . . . . ";
+				peticion += " . . . . . . . . . . . ";
 
 				// Check if user is leaving
 				if ( peticion.contains( "EXIT" ) ){
-					answer = "Leaving now. =(\n";
 					serverState = LOGOUT;
 				}
 
@@ -120,7 +119,7 @@ public class Processor extends Thread {
 							answer = "=) Hello, " + userLogin + "! Do yo want to join or to create a game?\n";
 							serverState = AUTHENTICATED;
 						}
-						else answer = "Error 0000001. Wrong username or password.\n";
+						else answer = "Error 0000001. Wrong username or password.\nFollow the syntax LOGIN <userlogin> PASSWD <userpassword>\n";
 						break;
 
 					case AUTHENTICATED:
@@ -133,8 +132,7 @@ public class Processor extends Thread {
 							code = Integer.parseInt( peticion.split( " " )[1] );
 						} catch ( Exception e ){
 							failedParse = true;
-						}	//NO SE QUE HACE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-System.out.println( failedParse );
+						}
 
 						// Check for valid code
 						if ( failedParse || code < 0 || code > games.length )
@@ -145,10 +143,6 @@ System.out.println( failedParse );
 							// Process request for joining an existing game
 							if ( peticion.split( " " )[0].equals( "JOIN" ) ){
 
-System.out.print( "Joining. gameCodes: " );
-for ( Boolean b : gameCodes )
-	System.out.print( "" + b + " " );
-System.out.print( "" );
 								if ( gameCodes[ code ] ){
 									answer = "Joining the game.\n";
 									// Remove it from games waiting for an adversary
@@ -170,10 +164,6 @@ System.out.print( "" );
 									games[code] = new Board();
 									serverState = WHITES;
 									color = WHITE;
-System.out.print( "Game created. gameCodes: " );
-for ( Boolean b : gameCodes )
-	System.out.print( "" + b + " " );
-System.out.print( "" );
 								}
 								else answer = "Error 405: game found. Enter a non-existing game code.\n";
 							}
@@ -200,7 +190,11 @@ System.out.print( "" );
 						}
 
 						// Blacks don't move here!
-						else answer = games[gameCode].toString() + "\nNot your turn yet.\n";
+						else { 
+							answer = games[gameCode].toString() + "\nNot your turn yet.\n";
+							if ( games[gameCode].getTurn() == 1 )
+								serverState = BLACKS;
+						}
 						break;
 
 					case BLACKS:
@@ -223,7 +217,17 @@ System.out.print( "" );
 						}
 
 						// Whites don't move here!
-						else answer = games[gameCode].toString() + "\nNot your turn yet.";
+						else { 
+							answer = games[gameCode].toString() + "\nNot your turn yet.\n";
+							if ( games[gameCode].getTurn() == 0 )
+								serverState = WHITES;
+						}
+						break;
+
+					case LOGOUT:
+
+						answer = "Leaving now. =(\n";
+
 						break;
 
 					default:
@@ -241,6 +245,8 @@ System.out.print( "" );
 		} catch ( IOException e ) {
 			System.err.println( "Error al obtener los flujos de entrada/salida." );
 		}
+
+		System.out.println( "Player leaving. Closing thread " + Thread.currentThread().getId() + "." );
 	}
         
 

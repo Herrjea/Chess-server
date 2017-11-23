@@ -16,7 +16,7 @@ public class Client {
 	public static void main( String[] args ) {
 		
 		byte [] buferEnvio;
-		byte [] buferRecepcion = new byte[256];
+		byte [] buferRecepcion = new byte[20000];
 		int bytesLeidos = 0;
 
 		Scanner in = new Scanner( System.in );
@@ -33,10 +33,10 @@ public class Client {
 			InputStream inputStream = socketServicio.getInputStream();
 			OutputStream outputStream = socketServicio.getOutputStream();
 			
-			while (teclado.toUpperCase() != "EXIT") {
+			while ( ! teclado.toUpperCase().contains( "EXIT" ) ) {
 
 				System.out.print( "> " );
-				teclado = in.nextLine();
+				teclado = in.nextLine() + " .";
 				buferEnvio = teclado.getBytes();
 
 				outputStream.write(buferEnvio,0,buferEnvio.length);
@@ -44,10 +44,11 @@ public class Client {
 
 				// Read answer
 				bytesLeidos = inputStream.read(buferRecepcion);
+
+				teclado = new String( buferRecepcion, 0, bytesLeidos );
 				
-				for(int i=0;i<bytesLeidos;i++){
-					System.out.print((char)buferRecepcion[i]);
-				}
+				System.out.println( teclado );
+				
 			}
 
 			socketServicio.close();

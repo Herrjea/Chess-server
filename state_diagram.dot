@@ -1,0 +1,5 @@
+
+digraph C {
+	start -> unauthenticated [ label = "connect / Log into the system" ];
+	unauthenticated -> unauthenticated [ label = "* / ERROR" ];
+}
