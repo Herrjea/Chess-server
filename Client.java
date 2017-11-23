@@ -22,7 +22,7 @@ public class Client {
 		Scanner in = new Scanner( System.in );
 
 		String host = "localhost";
-		int port = 8989;
+		int port = 9898;
 		Socket socketServicio = null;
 		
 		buferEnvio = "";

@@ -61,6 +61,9 @@ public class Processor extends Thread {
 
 		initialCapacity = 10;
 		games = new Board[ initialCapacity ];
+
+		for ( int i = 0; i < initialCapacity; i++ )
+			games[i] = new Board();
 	}
 	
         @Override
@@ -84,6 +87,8 @@ public class Processor extends Thread {
 				// Read client's request
 				datosRecibidos = inReader.readLine();
 				peticion = datosRecibidos.toUpperCase();
+
+				peticion += " . . . . . . . . . . ";
 
 				// Check if user is leaving
 				if ( peticion.contains( "EXIT" ) ){
@@ -123,13 +128,14 @@ public class Processor extends Thread {
 						// Get number typed by player
 						try {
 							code = Integer.parseInt( peticion.split( " " )[1] );
-						} catch ( NumberFormatException nfe ){
+						} catch ( Exception e ){
 							failedParse = true;
 						}	//NO SE QUE HACE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+System.out.println( failedParse );
 
 						// Check for valid code
 						if ( failedParse || code < 0 || code > games.length )
-							System.out.println( peticion.split( " " )[1] + " is not a valid code. Type in a number between 0 and " + games.length + " with the following syntax: \n\t(JOIN/CREATE) <code>\n" );
+							answer = peticion.split( " " )[1] + " is not a valid code. Type in a number between 0 and " + games.length + " with the following syntax: \n\t(JOIN/CREATE) <code>\n";
 
 						else {
 
@@ -211,6 +217,7 @@ public class Processor extends Thread {
 					default:
 
 						System.out.println( "You've done something wrong, this message should never appear. Muahaha." );
+
 						break;
 				}//End of switch
 
