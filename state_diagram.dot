@@ -1,5 +1,22 @@
 
-digraph C {
-	start -> unauthenticated [ label = "connect / Log into the system" ];
-	unauthenticated -> unauthenticated [ label = "* / ERROR" ];
+digraph States {
+
+	start -> unauthenticated [ label = " connect / Log into the system " ];
+	start -> end [ label = " EXIT / Leaving " ];
+
+	unauthenticated -> authenticated [ label = " LOGIN * PASSWD * / Create or join game? " ];
+	unauthenticated -> unauthenticated [ label = " * / ERROR " ];
+	unauthenticated -> end [ label = " EXIT / Leaving " ];
+
+	authenticated -> whites [ label = " CREATE * / Waiting for opponent " ];
+	authenticated -> blacks [ label = " JOIN * / Joining game " ];
+	authenticated -> authenticated [ label = " * / ERROR " ];
+	authenticated -> end [ label = " EXIT / Leaving " ];
+
+	whites -> blacks [ label = " MOV * TO * / Pieced moved" ];
+	whites -> whites [ label = " * / ERROR " ];
+	whites -> end [ label = " EXIT / Leaving " ];
+	blacks -> whites [ label = " MOV * TO * / Pieced moved" ];
+	blacks -> blacks [ label = " * / ERROR " ];
+	blacks -> end [ label = " EXIT / Leaving " ];
 }

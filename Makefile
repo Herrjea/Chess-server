@@ -4,7 +4,6 @@ all:
 
 clean:
 	find . -name '*.class' -exec rm {} \;
-	rm *.png
 
 redo:
 	touch *.java
