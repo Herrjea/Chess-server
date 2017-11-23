@@ -2,12 +2,11 @@
 // YodafyServidorIterativo
 // (CC) jjramos, 2012
 //
-import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -16,40 +15,45 @@ public class Client {
 
 	public static void main( String[] args ) {
 		
-		String buferEnvio;
-		String buferRecepcion;
+		byte [] buferEnvio;
+		byte [] buferRecepcion = new byte[256];
+		int bytesLeidos = 0;
 
 		Scanner in = new Scanner( System.in );
 
 		String host = "localhost";
-		int port = 9898;
+		int port = 8989;
 		Socket socketServicio = null;
-		
-		buferEnvio = "";
-		buferRecepcion = "";
+
+		String teclado = " ";
 
 		try {
 			socketServicio = new Socket( host, port );
 
-			BufferedReader inReader = new BufferedReader(new InputStreamReader(socketServicio.getInputStream()));
-			PrintWriter outPrinter = new PrintWriter(socketServicio.getOutputStream(), true);
+			InputStream inputStream = socketServicio.getInputStream();
+			OutputStream outputStream = socketServicio.getOutputStream();
 			
-			while (buferEnvio.toUpperCase() != "EXIT") {
+			while (teclado.toUpperCase() != "EXIT") {
+
+				if (teclado.toUpperCase() != "EXIT") System.out.print("holaaaa");
 
 				System.out.print( "> " );
-				buferEnvio = in.nextLine() + "\n";
+				teclado = in.nextLine();
+				buferEnvio = teclado.getBytes();
 
-				outPrinter.print(buferEnvio);
-				outPrinter.flush();
+				outputStream.write(buferEnvio,0,buferEnvio.length);
+				outputStream.flush();
 
-				// Leer la respuesta del servidor
-				buferRecepcion = inReader.readLine();
-				System.out.println( buferRecepcion );
+				// Read answer
+				bytesLeidos = inputStream.read(buferRecepcion);
+				
+				for(int i=0;i<bytesLeidos;i++){
+					System.out.print((char)buferRecepcion[i]);
+				}
 			}
 
-			//socketServicio.close();
+			socketServicio.close();
 			
-//System.out.println( "ccc" );
 			// Excepciones:
 		} catch ( UnknownHostException e ) {
 			System.err.println( "Error: Nombre de host no encontrado." );
