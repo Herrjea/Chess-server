@@ -1,6 +1,6 @@
 //
-// YodafyServidorIterativo
-// (CC) jjramos, 2012
+// José María Gómez García
+// Manuel Herrera Ojea
 //
 
 import java.io.IOException;

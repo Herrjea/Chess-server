@@ -1,16 +1,8 @@
-/*
+//
+//José María Gómez García
+// Manuel Herrera Ojea
+//
 
-
-Falta:
-	Comprobar que el usuario exista
-	Poner jugadores de ajedrez famosos en ls BD
-	Hacer concurrente esta clase
-	estados back to enum
-	Semáforos para las mesas
-	int para los códigos de mesas
-
-
-*/
 
 import java.io.IOException;
 import java.io.InputStream;

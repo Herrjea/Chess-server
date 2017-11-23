@@ -6,9 +6,11 @@ import java.net.Socket;
 
 
 //
-// YodafyServidorIterativo
-// (CC) jjramos, 2012
+// José María Gómez García
+// Manuel Herrera Ojea
 //
+
+
 public class TCPServer {
 
 
@@ -45,7 +47,7 @@ public class TCPServer {
 					System.out.println( "Error: no se pudo aceptar la conexión solicitada." );
 					error = true;
 				}
-				
+
 				System.out.println( "Player accepted." );
 			
 				
@@ -66,46 +68,3 @@ public class TCPServer {
 }
 
 
-/*
-try {
-			// Abrimos el socket en modo pasivo, escuchando el en puerto indicado por "port"
-			serverSocket = new ServerSocket( port );
-			
-			// Mientras ... siempre!
-			do {
-
-				// Aceptamos una nueva conexión con accept()
-				try {
-					System.out.println( "Server: Waiting for players to accept." );
-					socketServicio = serverSocket.accept();
-				} catch ( IOException e ){
-					System.out.println( "Error: Unable to accept connection." );
-					error = true;
-				}
-					System.out.println( "Server: Player accepted. Branching to new thread." );
-			
-				
-				// Creamos un objeto de la clase ProcesadorYodafy, pasándole como 
-				// argumento el nuevo socket, para que realice el procesamiento
-				// Este esquema permite que se puedan usar hebras más fácilmente.
-				Processor procesador = new Processor( socketServicio );
-				procesador.start();
-				
-			} while ( ! salir );
-			
-		} catch ( IOException e ) {
-			System.err.println( "Error trying to listen in port " + port );
-		}
-		To summarize my personality, I find great fulfillment in helping others, especially if it's my code that's helping. And if
-		Where there's lack of knowledge, there's a chan
-		I really enjoy being able to learn, helping others and watching me growing every day.
-		Being able to grow every day is what really gets me going, and that makes every conversation and every project a delight.
-
-		Code is how we tell our colleagues how we feel about them
-		A good code should read like a story, not like a puzzle
-		Prefer clear code over clever code
-		Programs must be written for people to read, and only inciddentally for machines to execute. Abelson and Sussman
-		Simplicity, brevity, clarity, humanity.
-		Code for humans to read a story, not for machines to execute a puzzle.
-		comunicacion@ongranada.com
-		*/
