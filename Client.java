@@ -22,7 +22,7 @@ public class Client {
 		Scanner in = new Scanner( System.in );
 
 		String host = "localhost";
-		int port = 8989;
+		int port = 9898;
 		Socket socketServicio = null;
 
 		String teclado = " ";
@@ -34,8 +34,6 @@ public class Client {
 			OutputStream outputStream = socketServicio.getOutputStream();
 			
 			while (teclado.toUpperCase() != "EXIT") {
-
-				if (teclado.toUpperCase() != "EXIT") System.out.print("holaaaa");
 
 				System.out.print( "> " );
 				teclado = in.nextLine();

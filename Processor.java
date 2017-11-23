@@ -12,25 +12,23 @@ Falta:
 
 */
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
 import chess.*;
 
 public class Processor extends Thread {
 
-	static HashMap<String,String> users = new HashMap<String,String>();
-	static ArrayList<Integer> gameCodes = new ArrayList<Integer>();
+	private static HashMap<String,String> users = new HashMap<String,String>();
 
 	// Boards for all of the games initiated by the clients
 	// that a currently being played
-	static int initialCapacity;
-	static Board [] games = null;
+	private static int initialCapacity = 10;
+	private static Board [] games = null;
+	private static Boolean [] gameCodes = null;
 
 	// Board code to access existing games
 	int gameCode;
@@ -38,9 +36,9 @@ public class Processor extends Thread {
 
 	private Socket socketServicio;
 
-	private BufferedReader inReader;
+	private InputStream inputStream;
 
-	private PrintWriter outPrinter;
+	private OutputStream outputStream;
 
 	int serverState;
 	int color;
@@ -59,34 +57,39 @@ public class Processor extends Thread {
 		serverState = START;
 		users.put("A","A");
 
-		initialCapacity = 10;
-		games = new Board[ initialCapacity ];
-
-		for ( int i = 0; i < initialCapacity; i++ )
-			games[i] = new Board();
+		if ( games == null )
+			games = new Board[ initialCapacity ];
+		if ( gameCodes == null ){
+			 gameCodes = new Boolean[ initialCapacity ];
+			for ( int i = 0; i < initialCapacity; i++ ){
+				games[i] = new Board();
+				gameCodes[i] = false;
+			}
+		}
 	}
 	
         @Override
 	public void run(){
 		
-		String datosRecibidos;
+		byte [] datosRecibidos = new byte[1024];
+		byte [] datosEnviar;
+		int bytesRecibidos = 0;
 		String answer;
 		String peticion;
 
-		datosRecibidos = "";
 		answer = "";
 		peticion = "";
 
 		try {
 			// Get IO flux
-			inReader = new BufferedReader(new InputStreamReader(socketServicio.getInputStream()));
-			outPrinter = new PrintWriter(socketServicio.getOutputStream(), true);
+			inputStream = socketServicio.getInputStream();
+			outputStream = socketServicio.getOutputStream();
 				
 			while (serverState != LOGOUT) {
 			
 				// Read client's request
-				datosRecibidos = inReader.readLine();
-				peticion = datosRecibidos.toUpperCase();
+				bytesRecibidos = inputStream.read( datosRecibidos );
+				peticion = new String( datosRecibidos, 0, bytesRecibidos ).toUpperCase();
 
 				peticion += " . . . . . . . . . . ";
 
@@ -142,11 +145,15 @@ System.out.println( failedParse );
 							// Process request for joining an existing game
 							if ( peticion.split( " " )[0].equals( "JOIN" ) ){
 
-								if ( gameCodes.contains( code ) ){
+System.out.print( "Joining. gameCodes: " );
+for ( Boolean b : gameCodes )
+	System.out.print( "" + b + " " );
+System.out.print( "" );
+								if ( gameCodes[ code ] ){
 									answer = "Joining the game.\n";
 									// Remove it from games waiting for an adversary
 									// so that no third party can come into the game
-									gameCodes.remove( code );
+									gameCodes[ code ] = false;
 									serverState = WHITES;
 									color = BLACK;
 								}
@@ -156,12 +163,17 @@ System.out.println( failedParse );
 							// Process request for starting a game
 							else if ( peticion.split( " " )[0].equals( "CREATE" ) ){
 
-								if ( ! gameCodes.contains( code ) ){
+								if ( ! gameCodes[ code ] ){
 									answer = "Game created. Waiting for your opponent.\n";
-									gameCodes.add( code );
+									gameCodes[ code ] = true;
+									System.out.println( "gameCode " + code + " set to true" );
 									games[code] = new Board();
 									serverState = WHITES;
 									color = WHITE;
+System.out.print( "Game created. gameCodes: " );
+for ( Boolean b : gameCodes )
+	System.out.print( "" + b + " " );
+System.out.print( "" );
 								}
 								else answer = "Error 405: game found. Enter a non-existing game code.\n";
 							}
@@ -222,7 +234,8 @@ System.out.println( failedParse );
 				}//End of switch
 
 				// Send to client
-				if (answer != "\n") outPrinter.println(answer);
+				datosEnviar = answer.getBytes();
+				outputStream.write( datosEnviar, 0, datosEnviar.length );
 			}//End of while
 				
 		} catch ( IOException e ) {
